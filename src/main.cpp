@@ -1,16 +1,11 @@
-#include <iarduino_RTC.h>
+#include <DS3231.h>
 
 // Shift register pins 74hc595
 int dataPin = 9;   // 14 вывод на регистре
 int clockPin = 11; // 11 вывод на регистре
 int latchPin = 12; // 12 вывод на регистре
 
-// Clock pins
-int CLK = 7;
-int DAT = 6;
-int RST = 5;
-
-iarduino_RTC time(RTC_DS1302, RST, CLK, DAT);
+DS3231 clock(SDA, SCL);
 
 void setup()
 {
@@ -20,19 +15,21 @@ void setup()
   pinMode(latchPin, OUTPUT);
   pinMode(dataPin, OUTPUT);
 
-  // Init time
-  time.begin();
+  clock.begin();
 
-  // Setup time
-  // СЕК, МИН, ЧАС, ДЕНЬ, МЕС, ГОД, ДН
-  // time.settime(0, 10, 10, 10, 1, 21, 1);
+  // День недели
+  clock.setDOW(MONDAY);
+  // Часы, минуты, секунды
+  clock.setTime(12, 10, 0);
+  // День, месяц, год
+  clock.setDate(25, 5, 2021);
 }
-
 void loop()
 {
-  time.gettime();
-  byte hours = time.Hours;
-  byte minutes = time.minutes;
+  Time time = clock.getTime();
+
+  byte hours = time.hour;
+  byte minutes = time.min;
 
   digitalWrite(latchPin, LOW);
   shiftOut(dataPin, clockPin, LSBFIRST, minutes);
